@@ -1,11 +1,4 @@
-const WIDTH: usize = 800;
-const HEIGHT: usize = 600;
-static mut BUFFER: [u32; WIDTH * HEIGHT] = [0; WIDTH * HEIGHT];
-
-use graphik::{
-    graphik_draw_line, graphik_fill, graphik_save_to_ppm, Error, GraphikBuffer, GraphikCircle,
-    GraphikRect,
-};
+use graphik::{Error, GraphikBuffer, GraphikCircle, GraphikLine, GraphikRect, HEIGHT, WIDTH};
 
 fn main() -> Result<(), Error> {
     let mut rect = GraphikRect::new(300, 200).center(true).color(0xff2020ff);
@@ -20,50 +13,18 @@ fn main() -> Result<(), Error> {
         .circle_fill(&mut circ)
         .save_as_ppm("target/circle.ppm")?;
 
-    unsafe {
-        // TODO: implement as GraphikBuffer functions
-        graphik_fill(&mut BUFFER, 0x0f0f00ff);
-        graphik_draw_line(
-            &mut BUFFER,
-            WIDTH,
-            HEIGHT,
-            0,
-            0,
-            WIDTH as i32,
-            HEIGHT as i32,
-            0xffffffff,
-        );
-        graphik_draw_line(
-            &mut BUFFER,
-            WIDTH,
-            HEIGHT,
-            WIDTH as i32,
-            0,
-            0,
-            HEIGHT as i32,
-            0xffffffff,
-        );
-        // graphik_draw_line(
-        //     &mut BUFFER,
-        //     WIDTH,
-        //     HEIGHT,
-        //     WIDTH as i32 / 2,
-        //     0,
-        //     WIDTH as i32 / 2,
-        //     HEIGHT as i32,
-        //     0xffffffff,
-        // );
-        // graphik_draw_line(
-        //     &mut BUFFER,
-        //     WIDTH,
-        //     HEIGHT,
-        //     0,
-        //     HEIGHT as i32 / 2,
-        //     WIDTH as i32,
-        //     HEIGHT as i32 / 2,
-        //     0xffffffff,
-        // );
-        graphik_save_to_ppm(&BUFFER, WIDTH, HEIGHT, "target/line.ppm".to_string())?;
-    }
+    let mut line = GraphikLine::new().color(0xff0000ff);
+    GraphikBuffer::new(WIDTH, HEIGHT)
+        .fill(0xff202020)
+        .line_draw2(&mut line)
+        .line_draw2(&mut line.start(WIDTH as i32, 0).end(0, HEIGHT as i32))
+        .line_draw2(&mut line.horizontal_center(0, WIDTH as i32))
+        .line_draw2(&mut line.vertical_center(0, HEIGHT as i32))
+        .line_draw2(&mut line.vertical(WIDTH as i32 / 3, 0, HEIGHT as i32))
+        .line_draw2(&mut line.horizontal(HEIGHT as i32 / 3, 0, WIDTH as i32))
+        .line_draw2(&mut line.start(0, 0).end(WIDTH as i32 / 5, HEIGHT as i32))
+        .line_draw2(&mut line.start(0, 0).end(WIDTH as i32 / 5 * 3, HEIGHT as i32))
+        .save_as_ppm("target/line2.ppm")?;
+
     Ok(())
 }
