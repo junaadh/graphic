@@ -1,5 +1,6 @@
 use graphik::{
-    lerpf, Error, GraphikBuilder, GraphikCircle, GraphikLine, GraphikRect, HEIGHT, WIDTH,
+    constants::*, graphik_circle::GraphikCircle, graphik_line::GraphikLine,
+    graphik_rect::GraphikRect, lerpf, Error, GraphikBuilder,
 };
 
 fn main() -> Result<(), Error> {
@@ -28,43 +29,39 @@ fn main() -> Result<(), Error> {
     builder.line_draw(&mut line.start(0, 0).end(WIDTH as i32 / 5 * 3, HEIGHT as i32));
     builder.save_as_ppm("target/line.ppm")?;
 
-    let rows = 6 * 2;
-    let cols = 8 * 2;
-    let cell_width = WIDTH / cols;
-    let cell_height = HEIGHT / rows;
-    let mut checker = GraphikRect::new(cell_width, cell_height)
+    let mut checker = GraphikRect::new(CELL_WIDTH, CELL_HEIGHT)
         .origin(0, 0)
         .color(0xffffffff);
     builder.fill(0x00000000);
-    for y in 0..rows {
-        for x in 0..cols {
+    for y in 0..ROWS {
+        for x in 0..COLS {
             if (x + y) % 2 == 0 {
                 builder.rect_fill(
-                    &mut checker.origin((x * cell_width) as i32, (y * cell_height) as i32),
+                    &mut checker.origin((x * CELL_WIDTH) as i32, (y * CELL_HEIGHT) as i32),
                 );
             }
         }
     }
     builder.save_as_ppm("target/checkers.ppm")?;
 
-    let mut radius = cell_width;
-    if cell_height < radius {
-        radius = cell_height;
+    let mut radius = CELL_WIDTH;
+    if CELL_HEIGHT < radius {
+        radius = CELL_HEIGHT;
     }
     let mut circ = GraphikCircle::new(radius).color(0xff0000ff);
     builder.fill(background);
-    for y in 0..rows {
-        for x in 0..cols {
-            let u = x as f32 / cols as f32;
-            let v = y as f32 / rows as f32;
+    for y in 0..ROWS {
+        for x in 0..COLS {
+            let u = x as f32 / COLS as f32;
+            let v = y as f32 / ROWS as f32;
             let t = (u + v) / 2f32;
 
             builder.circle_fill(
                 &mut circ
                     .radius(lerpf(radius as f32 / 8.0, radius as f32 / 2.0, t) as usize)
                     .origin(
-                        (x * cell_width + radius / 2) as i32,
-                        (y * cell_height + radius / 2) as i32,
+                        (x * CELL_WIDTH + radius / 2) as i32,
+                        (y * CELL_HEIGHT + radius / 2) as i32,
                     ),
             );
         }
