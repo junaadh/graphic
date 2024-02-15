@@ -2,9 +2,13 @@ pub mod constants;
 pub mod graphik_circle;
 pub mod graphik_line;
 pub mod graphik_rect;
+pub mod graphik_triangle;
+
 use graphik_circle::GraphikCircle;
 use graphik_line::GraphikLine;
 use graphik_rect::GraphikRect;
+use graphik_triangle::GraphikTriangle;
+
 use std::{
     cell::RefCell,
     fs::{File, OpenOptions},
@@ -109,6 +113,62 @@ impl GraphikBuilder {
                             let bufwid = buffer.width;
                             buffer.buffer[y as usize * bufwid + x as usize] = circle.color;
                         }
+                    }
+                }
+            }
+        }
+    }
+
+    pub fn triangle_fill(&mut self, triangle: &mut GraphikTriangle) {
+        let mut buffer = self.buffer.borrow_mut();
+
+        let dx12 = triangle.x2 - triangle.x1;
+        let dy12 = triangle.y2 - triangle.y1;
+        let dx13 = triangle.x3 - triangle.x1;
+        let dy13 = triangle.y3 - triangle.y1;
+
+        for y in triangle.y1..=triangle.y2 {
+            if 0 <= y && y < buffer.height as i32 {
+                let s1 = if dy12 != 0 {
+                    (y - triangle.y1) * dx12 / dy12 + triangle.x1
+                } else {
+                    triangle.x1
+                };
+                let s2 = if dy13 != 0 {
+                    (y - triangle.y1) * dx13 / dy13 + triangle.x1
+                } else {
+                    triangle.x1
+                };
+                for x in s1..=s2 {
+                    let width = buffer.width as i32;
+                    if 0 <= x && x < width {
+                        buffer.buffer[(y * width + x) as usize] = triangle.color;
+                    }
+                }
+            }
+        }
+
+        let dx32 = triangle.x2 - triangle.x3;
+        let dy32 = triangle.y2 - triangle.y3;
+        let dx31 = triangle.x1 - triangle.x3;
+        let dy31 = triangle.y1 - triangle.y3;
+
+        for y in triangle.y2..=triangle.y3 {
+            if 0 <= y && y < buffer.height as i32 {
+                let s1 = if dy12 != 0 {
+                    (y - triangle.y3) * dx32 / dy32 + triangle.x3
+                } else {
+                    triangle.x3
+                };
+                let s2 = if dy31 != 0 {
+                    (y - triangle.y3) * dx31 / dy31 + triangle.x3
+                } else {
+                    triangle.x3
+                };
+                for x in s1..=s2 {
+                    let width = buffer.width as i32;
+                    if 0 <= x && x < width {
+                        buffer.buffer[(y * width + x) as usize] = triangle.color;
                     }
                 }
             }

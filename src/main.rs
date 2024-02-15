@@ -1,24 +1,23 @@
 use graphik::{
     constants::*, graphik_circle::GraphikCircle, graphik_line::GraphikLine,
-    graphik_rect::GraphikRect, lerpf, Error, GraphikBuilder,
+    graphik_rect::GraphikRect, graphik_triangle::GraphikTriangle, lerpf, Error, GraphikBuilder,
 };
 
 fn main() -> Result<(), Error> {
-    let background = 0xff202020_u32;
     let mut builder = GraphikBuilder::new(WIDTH, HEIGHT);
 
     let mut rect = GraphikRect::new(300, 200).center(true).color(0xff2020ff);
-    builder.fill(background);
+    builder.fill(Colors::Background as u32);
     builder.rect_fill(&mut rect);
     builder.save_as_ppm("target/rectangle.ppm")?;
 
     let mut circ = GraphikCircle::new(150).center(true).color(0xff0000ff);
-    builder.fill(background);
+    builder.fill(Colors::Background as u32);
     builder.circle_fill(&mut circ);
     builder.save_as_ppm("target/circle.ppm")?;
 
     let mut line = GraphikLine::new().color(0xff0000ff);
-    builder.fill(background);
+    builder.fill(Colors::Background as u32);
     builder.line_draw(&mut line);
     builder.line_draw(&mut line.start(WIDTH as i32, 0).end(0, HEIGHT as i32));
     builder.line_draw(&mut line.horizontal_center(0, WIDTH as i32));
@@ -49,7 +48,7 @@ fn main() -> Result<(), Error> {
         radius = CELL_HEIGHT;
     }
     let mut circ = GraphikCircle::new(radius).color(0xff0000ff);
-    builder.fill(background);
+    builder.fill(Colors::Background as u32);
     for y in 0..ROWS {
         for x in 0..COLS {
             let u = x as f32 / COLS as f32;
@@ -67,6 +66,22 @@ fn main() -> Result<(), Error> {
         }
     }
     builder.save_as_ppm("target/circle_checkers.ppm")?;
+
+    let (x1, y1) = (WIDTH as i32 / 2, HEIGHT as i32 / 8);
+    let (x2, y2) = (WIDTH as i32 / 8, HEIGHT as i32 / 2);
+    let (x3, y3) = (WIDTH as i32 / 8 * 6, HEIGHT as i32 / 8 * 7);
+    let mut circ = GraphikCircle::new(5).color(Colors::Red as u32);
+    let mut tri = GraphikTriangle::new()
+        .first(x1, y1)
+        .second(x2, y2)
+        .third(x3, y3)
+        .color(Colors::Green as u32);
+    builder.fill(Colors::Background as u32);
+    builder.circle_fill(&mut circ.origin(x1, y1));
+    builder.circle_fill(&mut circ.origin(x2, y2));
+    builder.circle_fill(&mut circ.origin(x3, y3));
+    builder.triangle_fill(&mut tri);
+    builder.save_as_ppm("target/triangle.ppm")?;
 
     Ok(())
 }
