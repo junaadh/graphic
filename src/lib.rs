@@ -49,6 +49,43 @@ impl GraphikRect {
     }
 }
 
+#[derive(Debug, Clone, Copy)]
+pub struct GraphikCircle {
+    pub x0: i32,
+    pub y0: i32,
+    pub radius: usize,
+    pub color: u32,
+    pub center: bool,
+}
+
+impl GraphikCircle {
+    pub fn new(radius: usize) -> Self {
+        Self {
+            x0: 0,
+            y0: 0,
+            radius,
+            color: 0xffffffff,
+            center: false,
+        }
+    }
+
+    pub fn origin(&mut self, x0: i32, y0: i32) -> Self {
+        self.x0 = x0;
+        self.y0 = y0;
+        *self
+    }
+
+    pub fn center(&mut self, bool: bool) -> Self {
+        self.center = bool;
+        *self
+    }
+
+    pub fn color(&mut self, color: u32) -> Self {
+        self.color = color;
+        *self
+    }
+}
+
 #[derive(Debug)]
 pub struct GraphikBuffer {
     pub width: usize,
@@ -90,6 +127,34 @@ impl GraphikBuffer {
                 }
             }
         }
+        self
+    }
+
+    pub fn circle_fill(mut self, circle: &mut GraphikCircle) -> Self {
+        if circle.center {
+            let x0 = (self.width / 2) as i32;
+            let y0 = (self.height / 2) as i32;
+            circle.origin(x0, y0);
+        }
+
+        let x1 = circle.x0 - circle.radius as i32;
+        let y1 = circle.y0 - circle.radius as i32;
+        let x2 = circle.x0 + circle.radius as i32;
+        let y2 = circle.y0 + circle.radius as i32;
+        for y in y1..y2 {
+            if y < self.height as i32 {
+                for x in x1..x2 {
+                    if x < self.width as i32 {
+                        let dx = x - circle.x0;
+                        let dy = y - circle.y0;
+                        if (dx * dx + dy * dy) <= (circle.radius * circle.radius) as i32 {
+                            self.buffer[y as usize * self.width + x as usize] = circle.color;
+                        }
+                    }
+                }
+            }
+        }
+
         self
     }
 
@@ -171,34 +236,6 @@ fn write_header(file: &mut File, width: usize, height: usize) -> Result<(), Erro
     file.write_all(header.as_bytes())
         .map_err(|_| Error::FileWriteError)?;
     Ok(())
-}
-
-pub fn graphik_draw_circle(
-    buffer: &mut [u32],
-    width: usize,
-    height: usize,
-    cx: i32,
-    cy: i32,
-    r: usize,
-    color: u32,
-) {
-    let x1 = cx - r as i32;
-    let y1 = cy - r as i32;
-    let x2 = cx + r as i32;
-    let y2 = cy + r as i32;
-    for y in y1..y2 {
-        if y < height as i32 {
-            for x in x1..x2 {
-                if x < width as i32 {
-                    let dx = x - cx;
-                    let dy = y - cy;
-                    if (dx * dx + dy * dy) <= (r * r) as i32 {
-                        buffer[y as usize * width + x as usize] = color;
-                    }
-                }
-            }
-        }
-    }
 }
 
 #[allow(clippy::too_many_arguments)]
